@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="math.js"></script>
+<script type="text/javascript" src="poly.js"></script>
+<script type="text/javascript" src="renderer.js"></script>
+<title>GJK</title>
+</head>
+<body>
+<canvas id="canvas" width="600px" height="400px" /> 
+<script type="text/javascript">
+
+function print(point)
+{
+    alert(point.x + "," + point.y);
+}
+
+function GetMaxDirectional(A, v)
+{
+
+    var pA;
+    var max = -9999999;
+
+    for(var i=0; i<A.verticesGlobal.length; i++)
+    {
+        var dot = A.verticesGlobal[i].Dot(v);
+        if(dot > max)
+        {
+            max = dot;
+            pA = A.verticesGlobal[i];
+        }
+    }
+
+    return pA;
+}
+
+
+function Mapping(A,B, v)
+{
+    var pA = GetMaxDirectional(A,v)
+    var pB = GetMaxDirectional(B, v.Scale(-1) );
+
+    return pA.Minus(pB);
+}
+
+function DetectCollision(A,B)
+{
+    if(A.vertices.length < 2 || B.vertices.length < 2)
+    {
+        return false;
+    }
+
+    var origin = Point2(0,0);
+    var z = new Vector3(0,0,1);
+    var a = A.verticesGlobal[0].Minus(B.verticesGlobal[0]);
+    var b;
+    var c;
+    var n = 0;
+
+
+    while(true)
+    {
+        switch(n)
+        {
+            case 0:
+            {
+                var v = origin.Minus(a);
+                b = a;
+                a = Mapping(A, B, v);
+                if(a.Dot(v) >= 0)
+                {
+                    return false;
+                }
+
+                n = 1;
+                break;
+            }
+            case 1:
+            {
+                var ab = b.Minus(a);
+                var dot = ab.Dot(a);
+                if(dot > 0)
+                {
+                    var v =  ab.Cross(z);
+                    if(v.Dot(origin) < 0)
+                    {
+                        v = z.Cross(ab);
+                    }
+
+                    c = b;
+                    b = a;
+                    a = Mapping(A,B, v);
+                    n = 2;
+
+                    if(a.Dot(v) < 0)
+                    {
+                        return false;
+                    }
+                }else
+                {
+                    n = 0;
+                }
+
+                break;
+            }
+            case 2:
+            {
+                var v;
+                var ac = c.Minus(a);
+                if(a.Cross(ac) > 0)
+                {
+                    if(a.Dot(ac) > 0)
+                    {
+                        b = c;
+                        n = 1;
+                        v = 
+                    }else
+                    {
+                        v = a;
+                        n = 0;
+                    }
+                }
+
+
+                break;
+            }
+        }
+    }
+
+    return false;
+}
+
+var renderer;
+function init()
+{
+    var canvas = document.getElementById("canvas");
+    var vs = [];
+    vs.push( Point2(0,0) );
+    vs.push( Point2(100,0) );
+    vs.push( Point2(100,100) );
+    vs.push( Point2(0,100) );
+    
+    var p1 = new Poly(vs, MakeTransform(100,100,0) );
+    var p2 = new Poly(vs, MakeTransform(300,100,0) );
+    renderer = new Renderer(canvas);
+
+    renderer.AddShape(p1);
+    renderer.AddShape(p2);
+    renderer.Update(); //set global coordinates
+
+    var collision = DetectCollision(p1, p2);
+    alert("A");
+
+    setInterval(tick, 1000.0/60);
+}
+
+
+function tick()
+{
+    renderer.Update();
+}
+
+init();
+</script>
+
+
+</body>
+</html>
