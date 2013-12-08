@@ -10,11 +10,6 @@
 <canvas id="canvas" width="600px" height="400px" /> 
 <script type="text/javascript">
 
-function print(point)
-{
-    alert(point.x + "," + point.y);
-}
-
 function GetMaxDirectional(A, v)
 {
 
@@ -37,8 +32,10 @@ function GetMaxDirectional(A, v)
 
 function Mapping(A,B, v)
 {
+    //alert("v=" + v.x + "," + v.y);
     var pA = GetMaxDirectional(A,v)
     var pB = GetMaxDirectional(B, v.Scale(-1) );
+    //alert("pA=" + pA.x + "," + pA.y + "\npB=" + pB.x + "," + pB.y);
 
     return pA.Minus(pB);
 }
@@ -53,21 +50,24 @@ function DetectCollision(A,B)
     var origin = Point2(0,0);
     var z = new Vector3(0,0,1);
     var a = A.verticesGlobal[0].Minus(B.verticesGlobal[0]);
-    var b;
-    var c;
+    var b = Point2(0,0);
+    var c = Point2(0,0);
+    var v = Point2(0,0);
     var n = 0;
 
-
-    while(true)
+    var f = 0;
+    while(f < 4)
     {
+        f += 1;
+        //alert("n=" + n + "\na=" + a.x + "," + a.y + "\nb=" + b.x + "," + b.y + "\nc=" + c.x + "," + c.y + "\nv=" + v.x + "," + v.y);
         switch(n)
         {
             case 0:
             {
-                var v = origin.Minus(a);
+                v = origin.Minus(a);
                 b = a;
                 a = Mapping(A, B, v);
-                if(a.Dot(v) >= 0)
+                if(a.Dot(v) < 0)
                 {
                     return false;
                 }
@@ -77,14 +77,15 @@ function DetectCollision(A,B)
             }
             case 1:
             {
+                var a0 = origin.Minus(a);
                 var ab = b.Minus(a);
-                var dot = ab.Dot(a);
+                var dot = ab.Dot(a0);
                 if(dot > 0)
                 {
-                    var v =  ab.Cross(z);
-                    if(v.Dot(origin) < 0)
+                    v =  ab.Cross(z);
+                    if(v.Dot(a0) < 0)
                     {
-                        v = z.Cross(ab);
+                        v = ab.Cross(ab);
                     }
 
                     c = b;
@@ -105,23 +106,43 @@ function DetectCollision(A,B)
             }
             case 2:
             {
-                var v;
+                var a0 = origin.Minus(a);
                 var ac = c.Minus(a);
-                if(a.Cross(ac) > 0)
+                var ab = b.Minus(a);
+
+                //need to find handedness of triangle
+                var side = 1;
+                if(ac.Cross(ab).Dot(z) < 0)
                 {
-                    if(a.Dot(ac) > 0)
-                    {
-                        b = c;
-                        n = 1;
-                        v = 
-                    }else
-                    {
-                        v = a;
-                        n = 0;
-                    }
+                    side = -1;
                 }
 
-
+                if(a0.Cross(ac).Dot(z) * side > 0)
+                {
+                    if(a0.Dot(ac) > 0)
+                    {
+                        v = ac.Cross(z.Scale(side));
+                        b = c;
+                        n = 1;
+                    }else
+                    {
+                        n = 0;
+                    }
+                }else if(ab.Cross(a0).Dot(z) * side > 0)
+                {
+                    if(a0.Dot(ab) > 0)
+                    {
+                        v = z.Scale(side).Cross(ab);
+                        n = 1;
+                    }else
+                    {
+                        n = 0;
+                    }
+                }else
+                {
+                    return true;
+                }
+                
                 break;
             }
         }
@@ -135,13 +156,18 @@ function init()
 {
     var canvas = document.getElementById("canvas");
     var vs = [];
+    var vs2 = [];
     vs.push( Point2(0,0) );
     vs.push( Point2(100,0) );
     vs.push( Point2(100,100) );
     vs.push( Point2(0,100) );
+
+    vs2.push(vs[0]);
+    vs2.push(vs[1]);
+    vs2.push(vs[2]);
     
-    var p1 = new Poly(vs, MakeTransform(100,100,0) );
-    var p2 = new Poly(vs, MakeTransform(300,100,0) );
+    var p1 = new Poly(vs2, MakeTransform(200,0,0) );
+    var p2 = new Poly(vs2, MakeTransform(150,55,0) );
     renderer = new Renderer(canvas);
 
     renderer.AddShape(p1);
@@ -149,7 +175,7 @@ function init()
     renderer.Update(); //set global coordinates
 
     var collision = DetectCollision(p1, p2);
-    alert("A");
+    alert(collision);
 
     setInterval(tick, 1000.0/60);
 }
