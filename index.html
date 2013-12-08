@@ -48,13 +48,14 @@ function DetectCollision(A,B)
         return false;
     }
 
-    var origin = Point2(0,0);
+    var origin = new Vector3(0,0,0);
     var z = new Vector3(0,0,1);
     var a = A.verticesGlobal[0].Minus(B.verticesGlobal[0]);
     var b = Point2(0,0);
     var c = Point2(0,0);
     var v = Point2(0,0);
     var n = 0;
+    var tollerance = 0.00001;
 
     while(true)
     {
@@ -64,6 +65,12 @@ function DetectCollision(A,B)
             case 0:
             {
                 v = origin.Minus(a);
+                var d = v.Dot(v);
+                if(v.Dot(v) < tollerance)
+                {
+                    return true;
+                }
+
                 b = a;
                 a = Mapping(A, B, v);
                 if(a.Dot(v) < 0)
@@ -189,7 +196,7 @@ function init()
     vs3.push( Point2(50, 100) );
     vs3.push( Point2(0, 50) );
     
-    var p1 = new Poly(vs, MakeTransform(200,0,0) );
+    var p1 = new Poly(vs, MakeTransform(400,10,0) );
     var p2 = new Poly(vs2, MakeTransform(240,110,0) );
     var p3 = new Poly(vs3, MakeTransform(150,130,0) );
     var p4 = new Poly(vs, MakeTransform(100,200,30*3.14159/180) );
@@ -214,7 +221,7 @@ function init()
            if(collision) collisions += 1;
         }
     }
-//    alert(collisions);
+    //alert(collisions);
     setInterval(tick, 1000.0/60);
 }
 
