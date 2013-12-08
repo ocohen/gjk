@@ -25,6 +25,13 @@ Vector3.prototype.Dot = function(v)
     return this.x * v.x + this.y * v.y + this.w * v.w;
 }
 
+Vector3.prototype.Normalize = function(v)
+{
+    var l = Math.sqrt(this.Dot(this));
+    if(Math.abs(l) < 0.0001) return new Vector3 (0,0,0);
+    return new Vector3(this.x / l, this.y / l, this.w / l);
+}
+
 Vector3.prototype.Cross = function(v)
 {
     var i = this.y*v.w - this.w * v.y;

@@ -17,7 +17,7 @@ function DetectCollision(A,B)
     var collision = GJK(A,B);
     if(collision != false)
     {
-        EPA(collision);
+        return EPA(A,B, collision);
     }
 
     return collision;
@@ -62,7 +62,7 @@ function init()
     vs3.push( Point2(50, 100) );
     vs3.push( Point2(0, 50) );
     
-    var p1 = new Poly(vs, MakeTransform(400,10,0) );
+    var p1 = new Poly(vs, MakeTransform(200,10,0) );
     var p2 = new Poly(vs2, MakeTransform(240,110,0) );
     var p3 = new Poly(vs3, MakeTransform(150,130,0) );
     var p4 = new Poly(vs, MakeTransform(100,200,30*3.14159/180) );
@@ -137,6 +137,8 @@ function tick()
         shapes[i].collide = false;
     }
     var collisions = 0;
+    var context = canvas.getContext("2d");
+    context.fillStyle = "white";
     for(var i=0; i<shapes.length; i++)
     {
         for(var j=i+1; j<shapes.length; j++)
@@ -147,15 +149,24 @@ function tick()
                collisions += 1;
                shapes[j].collide = true;
                shapes[i].collide = true;
+
+               if(shapes[j].selected == false)
+               {
+                   var pt = shapes[j].GetOrigin();
+                   var n = collision.n;
+                   var newPt = pt.Add(n);
+                   //shapes[j].SetOrigin(newPt);
+
+                   context.font = "12px Arial";
+                   context.fillText("Distance: " + collision.dist + " Normal: " + n.x+ "," + n.y, 10, 30 + 13*collisions);
+               }
            }
         }
     }
-    var context = canvas.getContext("2d");
-    context.fillStyle = "white";
     context.font = "14px Arial";
     context.fillText("Collisions: " + collisions, 10, 20);
     context.font = "12px Arial";
-    context.fillText("Click and drag to move shapes", 10, 40);
+    context.fillText("Click and drag to move shapes", 10, 50 + 13*collisions);
 }
 
 init();

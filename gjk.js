@@ -1,3 +1,5 @@
+var tollerance = 0.00001;
+
 function GetMaxDirectional(A, v)
 {
 
@@ -33,6 +35,7 @@ function Simplex(a,b,c)
     this.a = a;
     this.b = b;
     this.c = c;
+    this.s = [a,b,c];
 }
 
 function GJK(A,B)
@@ -49,7 +52,6 @@ function GJK(A,B)
     var c = Point2(0,0);
     var v = Point2(0,0);
     var n = 0;
-    var tollerance = 0.00001;
 
     while(true)
     {
@@ -151,8 +153,73 @@ function GJK(A,B)
     return false;
 }
 
-
-function EPA(simplex)
+function Edge(index, dist, n)
 {
+    this.dist = dist;
+    this.n = n;
+    this.index = index;
+}
 
+function GetClosestEdge(simplex)
+{
+    var minEdge = new Edge(0, 999999999, new Vector3(0,0,0) );
+    var origin = new Vector3(0,0,0);
+    var z = new Vector3(0,0,1);
+    for(var i=0; i<simplex.s.length; i++)
+    {
+        var j = i-1;
+        if(j < 0) j = simplex.s.length-1;
+        var a = simplex.s[j];
+        var b = simplex.s[i];
+        var ab = b.Minus(a);
+        var a0 = origin.Minus(a);
+        var k = a0.Cross(ab); 
+        var n = ab.Cross(k).Normalize();
+        var d = a0.Dot(n);
+        if(d < minEdge.dist)
+        {
+            minEdge.minDist = d;
+            minEdge.index= j;
+            minEdge.n = n;
+        }
+    }
+
+    return minEdge;
+}
+
+function InArray(s, a)
+{
+    for(var j=0; j<s.length; j++)
+    {
+        if(s[j].x == a.x && s[j].y == a.y) return true;
+    }
+    return false;
+}
+
+function EPA(A,B,simplex)
+{
+    while(true)
+    {
+        var e = GetClosestEdge(simplex);    
+        var a = Mapping(A,B, e.n);
+        
+        /*
+        var out = "";
+        for(var i=0; i<simplex.s.length; i++)
+        {
+            out += "\ns" + i + "=" + simplex.s[i].x + "," + simplex.s[i].y;
+        }
+
+        alert("e=" + e.n.x +"," + e.n.y + "\na=" + a.x + "," + a.y + out);
+        */
+
+        var d = e.n.Dot(a);
+        if(e.dist - d < tollerance || InArray(simplex.s, a) )
+        {
+            return new Edge(e.index, d, e.n);
+        }else
+        {
+            simplex.s.splice(e.index, 0, a);        
+        }
+    }
 }
