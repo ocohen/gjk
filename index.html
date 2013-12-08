@@ -83,7 +83,7 @@ function DetectCollision(A,B)
                     v =  ab.Cross(z);
                     if(v.Dot(a0) < 0)
                     {
-                        v = ab.Cross(ab);
+                        v = z.Cross(ab);
                     }
 
                     c = b;
@@ -151,11 +151,27 @@ function DetectCollision(A,B)
 
 var renderer;
 var shapes = [];
+var mouseX = 0;
+var mouseY = 0;
+var mouseDown = false;
+var mousePress = false;
+
 function init()
 {
     var canvas = document.getElementById("canvas");
+    canvas.addEventListener('mousemove',  function onMouseMove(e)
+        {
+        var rect = canvas.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+        }, false);
+    canvas.addEventListener('mousedown', function onMouseDown(){ mouseDown = true; mousePress = true;}, false);
+    canvas.addEventListener('mouseup', function onMouseDown(){ mouseDown = false;}, false);
+
+
     var vs = [];
     var vs2 = [];
+    var vs3 = [];
     vs.push( Point2(0,0) );
     vs.push( Point2(100,0) );
     vs.push( Point2(100,100) );
@@ -164,25 +180,29 @@ function init()
     vs2.push(vs[0]);
     vs2.push(vs[1]);
     vs2.push(vs[2]);
+
+    vs3.push( Point2(50,0) );
+    vs3.push( Point2(100,0) );
+    vs3.push( Point2(150,50) );
+    vs3.push( Point2(100,100) );
+    vs3.push( Point2(50, 100) );
+    vs3.push( Point2(0, 50) );
     
-    var p1 = new Poly(vs2, MakeTransform(200,0,0) );
-    var p2 = new Poly(vs2, MakeTransform(150,50,0) );
-    var p3 = new Poly(vs2, MakeTransform(150,130,0) );
+    var p1 = new Poly(vs, MakeTransform(200,0,0) );
+    var p2 = new Poly(vs2, MakeTransform(240,110,0) );
+    var p3 = new Poly(vs3, MakeTransform(150,130,0) );
+    var p4 = new Poly(vs, MakeTransform(100,200,30*3.14159/180) );
     renderer = new Renderer(canvas);
 
     renderer.AddShape(p1);
     renderer.AddShape(p2);
     renderer.AddShape(p3);
+    renderer.AddShape(p4);
     shapes.push(p1);
     shapes.push(p2);
     shapes.push(p3);
+    shapes.push(p4);
 
-    setInterval(tick, 1000.0/60);
-}
-
-
-function tick()
-{
     renderer.Update();
     var collisions = 0;
     for(var i=0; i<shapes.length; i++)
@@ -193,8 +213,71 @@ function tick()
            if(collision) collisions += 1;
         }
     }
+//    alert(collisions);
+    setInterval(tick, 1000.0/60);
+}
+
+var currentShape = false;
+var xOffset = 0;
+var yOffset = 0;
+
+function MoveShapes()
+{
+    if(mousePress)
+    {
+        mousePress = false;
+        for(var i=0; i<shapes.length; i++)
+        {
+            if(shapes[i].ContainsPoint(Point2(mouseX,mouseY)))
+            {
+                currentShape = shapes[i];
+                xOffset = currentShape.GetOrigin().x - mouseX;
+                yOffset = currentShape.GetOrigin().y - mouseY;
+                break;
+            }
+        }
+    }
+
+    if(currentShape)
+    {
+        if(mouseDown)
+        {
+            currentShape.SetOrigin( Point2(mouseX + xOffset, mouseY + yOffset) );
+            currentShape.selected = true;
+        }else
+        {
+            currentShape.selected = false;
+            currentShape = false;
+        }
+    }
+}
+
+function tick()
+{
+    MoveShapes();
+
+    renderer.Update();
+
+    for(var i=0; i<shapes.length; i++)
+    {
+        shapes[i].collide = false;
+    }
+    var collisions = 0;
+    for(var i=0; i<shapes.length; i++)
+    {
+        for(var j=i+1; j<shapes.length; j++)
+        {
+           var collision = DetectCollision(shapes[i], shapes[j]);
+           if(collision)
+           {
+               collisions += 1;
+               shapes[j].collide = true;
+               shapes[i].collide = true;
+           }
+        }
+    }
     var context = canvas.getContext("2d");
-    context.fillStyle = "black";
+    context.fillStyle = "white";
     context.font = "14px Arial";
     context.fillText("Collisions: " + collisions, 10, 20);
     context.font = "12px Arial";
