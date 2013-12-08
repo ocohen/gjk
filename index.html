@@ -62,9 +62,9 @@ function init()
     vs3.push( Point2(50, 100) );
     vs3.push( Point2(0, 50) );
     
-    var p1 = new Poly(vs, MakeTransform(200,10,0) );
+    var p1 = new Poly(vs, MakeTransform(410,50,0) );
     var p2 = new Poly(vs2, MakeTransform(240,110,0) );
-    var p3 = new Poly(vs3, MakeTransform(150,130,0) );
+    var p3 = new Poly(vs3, MakeTransform(120,130,0) );
     var p4 = new Poly(vs, MakeTransform(100,200,30*3.14159/180) );
     renderer = new Renderer(canvas);
 
@@ -87,7 +87,7 @@ function init()
            if(collision) collisions += 1;
         }
     }
-    //alert(collisions);
+    alert(collisions);
     setInterval(tick, 1000.0/60);
 }
 
@@ -150,16 +150,21 @@ function tick()
                shapes[j].collide = true;
                shapes[i].collide = true;
 
-               if(shapes[j].selected == false)
+               var l = i;
+               var side = -1;
+               if(shapes[i].selected)
                {
-                   var pt = shapes[j].GetOrigin();
-                   var n = collision.n;
-                   var newPt = pt.Add(n);
-                   //shapes[j].SetOrigin(newPt);
-
-                   context.font = "12px Arial";
-                   context.fillText("Distance: " + collision.dist + " Normal: " + n.x+ "," + n.y, 10, 30 + 13*collisions);
+                   l = j;
+                   side = 1;
                }
+
+               var pt = shapes[l].GetOrigin();
+               var n = collision.n.Scale(side * collision.dist);
+               var newPt = pt.Add(n);
+               shapes[l].SetOrigin(newPt);
+
+               context.font = "12px Arial";
+               context.fillText("Distance: " + collision.dist + " Normal: " + n.x+ "," + n.y, 10, 30 + 13*collisions);
            }
         }
     }
