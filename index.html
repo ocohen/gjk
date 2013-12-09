@@ -8,8 +8,8 @@
 <title>GJK</title>
 </head>
 <body>
-<h1>GJK</h1>
-<canvas id="canvas" width="600px" height="400px" /> 
+<h1>GJK + EPA</h1>
+<canvas id="canvas" width="1000px" height="400px" /> 
 <script type="text/javascript">
 
 function DetectCollision(A,B)
@@ -42,6 +42,7 @@ function init()
     canvas.addEventListener('mousedown', function onMouseDown(){ mouseDown = true; mousePress = true;}, false);
     canvas.addEventListener('mouseup', function onMouseDown(){ mouseDown = false;}, false);
 
+    renderer = new Renderer(canvas);
 
     var vs = [];
     var vs2 = [];
@@ -61,12 +62,11 @@ function init()
     vs3.push( Point2(100,100) );
     vs3.push( Point2(50, 100) );
     vs3.push( Point2(0, 50) );
-    
-    var p1 = new Poly(vs, MakeTransform(310,50,0) );
+
+    var p1 = new Poly(vs, MakeTransform(460,80,0) );
     var p2 = new Poly(vs2, MakeTransform(240,110,0) );
     var p3 = new Poly(vs3, MakeTransform(120,130,0) );
     var p4 = new Poly(vs, MakeTransform(100,200,30*3.14159/180) );
-    renderer = new Renderer(canvas);
 
     renderer.AddShape(p1);
     renderer.AddShape(p2);
@@ -84,7 +84,11 @@ function init()
         for(var j=i+1; j<shapes.length; j++)
         {
            var collision = DetectCollision(shapes[i], shapes[j]);
-           if(collision) collisions += 1;
+           if(collision)
+           {
+               collisions += 1;
+               //alert(collision.n.x + ", " + collision.n.y);
+           }
         }
     }
     //alert(collisions);
@@ -164,7 +168,7 @@ function tick()
                shapes[l].SetOrigin(newPt);
 
                context.font = "12px Arial";
-               //context.fillText("Distance: " + collision.dist + " Normal: " + n.x+ "," + n.y, 10, 30 + 13*collisions);
+               //context.fillText("Distance: " + collision.dist + " Normal: " + collision.n.x+ "," + collision.n.y, 10, 30 + 13*collisions);
            }
         }
     }
