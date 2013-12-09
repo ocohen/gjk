@@ -25,7 +25,7 @@ Vector3.prototype.Dot = function(v)
     return this.x * v.x + this.y * v.y + this.w * v.w;
 }
 
-Vector3.prototype.Normalize = function(v)
+Vector3.prototype.Normalize = function()
 {
     var l = Math.sqrt(this.Dot(this));
     if(Math.abs(l) < 0.0001) return new Vector3 (0,0,0);

@@ -175,6 +175,8 @@ function GetClosestEdge(simplex)
         var k = a.Cross(ab); 
         var n = ab.Cross(k).Normalize();
         var d = Math.abs(a.Dot(n));
+        var d2 = Math.abs(b.Dot(n));
+        if(d < d2) d = d2;
         if(d < minEdge.dist)
         {
             //alert("n=" + n.x + "," + n.y + "\na=" + a.x + "," + a.y + "\nb=" + b.x + ","  + b.y + "\nd=" + d + "\nab=" + ab.x + "," + ab.y + "\nk=" + k.x +"," +k.y + "," + k.w);
@@ -187,45 +189,32 @@ function GetClosestEdge(simplex)
     return minEdge;
 }
 
-function InArray(s, a)
-{
-    for(var i=0; i<s.length; i++)
-    {
-        if(s[i].x == a.x && s[i].y == a.y) return true;
-    }
-
-    return false;
-}
-
 function EPA(A,B,simplex)
 {
-    var f = 0;
-    while(f<4)
+    while(true)
     {
-        //f += 1;
         var e = GetClosestEdge(simplex);    
         var a = Mapping(A,B, e.n);
         
-        
-        var out = "";
+        /*var out = "";
         for(var i=0; i<simplex.s.length; i++)
         {
             out += "\ns" + i + "=" + simplex.s[i].x + "," + simplex.s[i].y;
-        }
+        }*/
 
-        //alert("e.index=" + e.index + "\ne.n=" + e.n.x +"," + e.n.y + "\na=" + a.x + "," + a.y + out);
         
 
         var d = e.n.Dot(a);
-        if(d - e.dist < tollerance || InArray(simplex.s, a) )
+        //alert("e.index=" + e.index + "\ne.n=" + e.n.x +"," + e.n.y + "\na=" + a.x + "," + a.y + out + "\ne.dist=" + e.dist + "\nd=" + d);
+        if(d - e.dist < tollerance)
         {
             //alert("A");
-            //alert("e.index=" + e.index + "\ne.n=" + e.n.x +"," + e.n.y + "\na=" + a.x + "," + a.y + out);
+            //alert("e.index=" + e.index + "\ne.n=" + e.n.x +"," + e.n.y + "\na=" + a.x + "," + a.y + out + "\ne.dist=" + e.dist + "\nd=" + d);
             return new Edge(e.index, d, e.n);
         }else
         {
             //alert(e.index);
-            simplex.s.splice(e.index, 0, a);        
+            simplex.s.splice(e.index + 1, 0, a);        
         }
     }
 

@@ -62,7 +62,7 @@ function init()
     vs3.push( Point2(50, 100) );
     vs3.push( Point2(0, 50) );
     
-    var p1 = new Poly(vs, MakeTransform(410,50,0) );
+    var p1 = new Poly(vs, MakeTransform(310,50,0) );
     var p2 = new Poly(vs2, MakeTransform(240,110,0) );
     var p3 = new Poly(vs3, MakeTransform(120,130,0) );
     var p4 = new Poly(vs, MakeTransform(100,200,30*3.14159/180) );
@@ -87,7 +87,7 @@ function init()
            if(collision) collisions += 1;
         }
     }
-    alert(collisions);
+    //alert(collisions);
     setInterval(tick, 1000.0/60);
 }
 
@@ -164,14 +164,14 @@ function tick()
                shapes[l].SetOrigin(newPt);
 
                context.font = "12px Arial";
-               context.fillText("Distance: " + collision.dist + " Normal: " + n.x+ "," + n.y, 10, 30 + 13*collisions);
+               //context.fillText("Distance: " + collision.dist + " Normal: " + n.x+ "," + n.y, 10, 30 + 13*collisions);
            }
         }
     }
     context.font = "14px Arial";
     context.fillText("Collisions: " + collisions, 10, 20);
     context.font = "12px Arial";
-    context.fillText("Click and drag to move shapes", 10, 50 + 13*collisions);
+    context.fillText("Click and drag to move shapes", 10, 40);
 }
 
 init();
